@@ -1,0 +1,553 @@
+<div class="contenedor">
+
+  <div class="encabezado">
+    <h1>{{ esPaciente() ? 'Mis Citas' : 'Gestión de Citas' }}</h1>
+  </div>
+
+  <div *ngIf="mensaje" class="mensaje exito">
+    {{ mensaje }}
+  </div>
+
+  <div *ngIf="error" class="mensaje error">
+    {{ error }}
+  </div>
+
+  <!-- FORMULARIO PARA CREAR CITA -->
+  <div
+    *ngIf="esAdmin() || esRecepcionista() || esPaciente()"
+    class="card"
+  >
+    <h2>Nueva Cita</h2>
+
+    <div class="formulario">
+
+      <div class="campo">
+        <label>Código de cita</label>
+        <input [(ngModel)]="nuevaCita.codigoCita" readonly />
+      </div>
+
+      <div
+        class="campo"
+        *ngIf="esAdmin() || esRecepcionista()"
+      >
+        <label>Paciente</label>
+
+        <select [(ngModel)]="nuevaCita.pacienteId">
+          <option [ngValue]="null">Seleccione un paciente</option>
+
+          <option
+            *ngFor="let p of pacientes"
+            [ngValue]="p.id"
+          >
+            {{ p.nombre }} {{ p.apellido }}
+          </option>
+        </select>
+      </div>
+
+      <div
+        class="campo"
+        *ngIf="esPaciente()"
+      >
+        <label>Paciente</label>
+        <input value="Paciente actual" readonly />
+      </div>
+
+      <div class="campo">
+        <label>Especialidad</label>
+
+        <select
+          [(ngModel)]="nuevaCita.especialidadId"
+          (change)="cargarMedicosPorEspecialidad()"
+        >
+          <option [ngValue]="null">Seleccione una especialidad</option>
+
+          <option
+            *ngFor="let e of especialidades"
+            [ngValue]="e.id"
+          >
+            {{ e.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Médico</label>
+
+        <select
+          [(ngModel)]="nuevaCita.medicoId"
+          (change)="cargarHorariosDelMedico()"
+          [disabled]="!nuevaCita.especialidadId"
+        >
+          <option [ngValue]="null">
+            {{
+              nuevaCita.especialidadId
+                ? 'Seleccione un médico'
+                : 'Seleccione primero una especialidad'
+            }}
+          </option>
+
+          <option
+            *ngFor="let m of medicos"
+            [ngValue]="m.id"
+          >
+            {{ m.nombre }} {{ m.apellido }}
+          </option>
+        </select>
+      </div>
+
+      <div
+        *ngIf="mensajeHorario"
+        class="campo campo-completo mensaje info"
+      >
+        {{ mensajeHorario }}
+      </div>
+
+      <div class="campo">
+        <label>Fecha</label>
+
+        <select
+          [(ngModel)]="nuevaCita.fecha"
+          (change)="cargarHorasDisponibles()"
+          [disabled]="!nuevaCita.medicoId || fechasDisponibles.length === 0"
+        >
+          <option value="">
+            {{
+              nuevaCita.medicoId
+                ? 'Seleccione una fecha disponible'
+                : 'Seleccione primero un médico'
+            }}
+          </option>
+
+          <option
+            *ngFor="let fecha of fechasDisponibles"
+            [value]="fecha"
+          >
+            {{ fecha }}
+          </option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Hora</label>
+
+        <select
+          [(ngModel)]="nuevaCita.hora"
+          [disabled]="!nuevaCita.fecha || horasDisponibles.length === 0"
+        >
+          <option value="">
+            {{
+              nuevaCita.fecha
+                ? 'Seleccione una hora disponible'
+                : 'Seleccione primero una fecha'
+            }}
+          </option>
+
+          <option
+            *ngFor="let hora of horasDisponibles"
+            [value]="hora"
+          >
+            {{ hora }}
+          </option>
+        </select>
+      </div>
+
+      <div class="campo campo-completo">
+        <label>Observaciones</label>
+        <textarea [(ngModel)]="nuevaCita.observaciones"></textarea>
+      </div>
+
+      <div
+        *ngIf="medicosSugeridos.length > 0"
+        class="campo campo-completo mensaje info"
+      >
+        No hay disponibilidad con el médico seleccionado. Puedes intentar con:
+
+        <strong *ngFor="let m of medicosSugeridos; let ultimo = last">
+          {{ m.nombre }} {{ m.apellido }}{{ ultimo ? '' : ', ' }}
+        </strong>
+      </div>
+
+    </div>
+
+    <button
+      class="btn-guardar"
+      (click)="guardarCita()"
+    >
+      Revisar Cita
+    </button>
+  </div>
+
+  <!-- RESUMEN ANTES DE CONFIRMAR -->
+  <div
+    *ngIf="mostrarResumenCita && resumenCita"
+    class="card resumen-card"
+  >
+    <h2>Confirmar Cita</h2>
+
+    <p><strong>Código:</strong> {{ resumenCita.codigoCita }}</p>
+    <p><strong>Paciente:</strong> {{ resumenCita.paciente }}</p>
+    <p><strong>Médico:</strong> {{ resumenCita.medico }}</p>
+    <p><strong>Especialidad:</strong> {{ resumenCita.especialidad }}</p>
+    <p><strong>Fecha:</strong> {{ resumenCita.fecha }}</p>
+    <p><strong>Hora:</strong> {{ resumenCita.hora }}</p>
+    <p><strong>Observaciones:</strong> {{ resumenCita.observaciones }}</p>
+
+    <button
+      class="btn-guardar"
+      (click)="confirmarCita()"
+    >
+      Confirmar Cita
+    </button>
+
+    <button
+      class="btn-secundario"
+      (click)="cancelarResumenCita()"
+    >
+      Modificar datos
+    </button>
+  </div>
+
+  <!-- COMPROBANTE DESPUÉS DE GUARDAR -->
+  <div
+    *ngIf="comprobanteCita"
+    class="card comprobante-card"
+  >
+    <h2>Comprobante de cita</h2>
+
+    <p><strong>Código de cita:</strong> {{ comprobanteCita.codigoCita }}</p>
+    <p><strong>Paciente:</strong> {{ obtenerPacienteNombre(comprobanteCita.pacienteId) }}</p>
+    <p><strong>Médico:</strong> {{ obtenerMedicoNombre(comprobanteCita.medicoId) }}</p>
+    <p><strong>Especialidad:</strong> {{ obtenerEspecialidadNombre(comprobanteCita.especialidadId) }}</p>
+    <p><strong>Fecha:</strong> {{ comprobanteCita.fecha }}</p>
+    <p><strong>Hora:</strong> {{ comprobanteCita.hora }}</p>
+    <p><strong>Estado:</strong> {{ comprobanteCita.estado }}</p>
+  </div>
+
+  <!-- FORMULARIO PARA REGISTRAR ATENCIÓN MÉDICA -->
+  <div
+    *ngIf="atendiendoCita"
+    class="card atencion-card"
+  >
+    <h2>Registrar Atención Médica</h2>
+
+    <div class="detalle-atencion">
+
+      <p>
+        <strong>Código de cita:</strong>
+        <span>{{ atendiendoCita.codigoCita }}</span>
+      </p>
+
+      <p>
+        <strong>Paciente:</strong>
+        <span>{{ obtenerPacienteNombre(atendiendoCita.pacienteId) }}</span>
+      </p>
+
+      <p>
+        <strong>Médico:</strong>
+        <span>{{ obtenerMedicoNombre(atendiendoCita.medicoId) }}</span>
+      </p>
+
+      <p>
+        <strong>Especialidad:</strong>
+        <span>{{ obtenerEspecialidadNombre(atendiendoCita.especialidadId) }}</span>
+      </p>
+
+      <p>
+        <strong>Fecha:</strong>
+        <span>{{ atendiendoCita.fecha }}</span>
+      </p>
+
+      <p>
+        <strong>Hora:</strong>
+        <span>{{ atendiendoCita.hora }}</span>
+      </p>
+
+    </div>
+
+    <div class="formulario-atencion">
+
+      <div class="campo campo-completo">
+        <label>Diagnóstico principal</label>
+        <textarea [(ngModel)]="registroClinico.diagnosticoPrincipal"></textarea>
+      </div>
+
+      <div class="campo campo-completo">
+        <label>Receta médica</label>
+        <textarea [(ngModel)]="registroClinico.recetaMedica"></textarea>
+      </div>
+
+      <div class="campo campo-completo">
+        <label>Observaciones clínicas</label>
+        <textarea [(ngModel)]="registroClinico.observaciones"></textarea>
+      </div>
+
+      <div class="campo campo-completo">
+        <label>Resultado de laboratorio</label>
+        <textarea [(ngModel)]="registroClinico.resultadoLaboratorio"></textarea>
+      </div>
+
+    </div>
+
+    <div class="acciones-atencion">
+      <button
+        class="btn-guardar"
+        (click)="guardarAtencion()"
+      >
+        Guardar atención
+      </button>
+
+      <button
+        class="btn-secundario"
+        (click)="cancelarAtencion()"
+      >
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <!-- REPROGRAMAR: ADMIN, RECEPCIONISTA Y PACIENTE -->
+  <div
+    *ngIf="reprogramandoId && (esAdmin() || esRecepcionista() || esPaciente())"
+    class="card"
+  >
+    <h2>Reprogramar Cita #{{ reprogramandoId }}</h2>
+
+    <div
+      *ngIf="mensajeHorarioReprogramacion"
+      class="mensaje info"
+    >
+      {{ mensajeHorarioReprogramacion }}
+    </div>
+
+    <div class="formulario">
+
+      <div class="campo">
+        <label>Nueva fecha</label>
+
+        <select
+          [(ngModel)]="reprogramacion.fecha"
+          (change)="cargarHorasDisponiblesReprogramacion()"
+          [disabled]="fechasDisponiblesReprogramacion.length === 0"
+        >
+          <option value="">
+            {{
+              fechasDisponiblesReprogramacion.length > 0
+                ? 'Seleccione una fecha disponible'
+                : 'No hay fechas disponibles'
+            }}
+          </option>
+
+          <option
+            *ngFor="let fecha of fechasDisponiblesReprogramacion"
+            [value]="fecha"
+          >
+            {{ fecha }}
+          </option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Nueva hora</label>
+
+        <select
+          [(ngModel)]="reprogramacion.hora"
+          [disabled]="!reprogramacion.fecha || horasDisponiblesReprogramacion.length === 0"
+        >
+          <option value="">
+            {{
+              reprogramacion.fecha
+                ? 'Seleccione una hora disponible'
+                : 'Seleccione primero una fecha'
+            }}
+          </option>
+
+          <option
+            *ngFor="let hora of horasDisponiblesReprogramacion"
+            [value]="hora"
+          >
+            {{ hora }}
+          </option>
+        </select>
+      </div>
+
+      <div class="campo campo-completo">
+        <label>Observaciones</label>
+        <textarea [(ngModel)]="reprogramacion.observaciones"></textarea>
+      </div>
+
+    </div>
+
+    <button
+      class="btn-guardar"
+      (click)="reprogramar()"
+    >
+      Guardar Reprogramación
+    </button>
+
+    <button
+      class="btn-secundario"
+      (click)="cancelarReprogramacion()"
+    >
+      Cancelar
+    </button>
+  </div>
+
+  <!-- VISTA ESPECIAL PARA PACIENTE -->
+  <div *ngIf="esPaciente()" class="card">
+
+    <h2>Mis Citas</h2>
+
+    <div
+      *ngIf="pacienteSinCitas()"
+      class="mensaje info"
+    >
+      Actualmente no tiene citas médicas registradas en su historial ni programadas para el futuro.
+    </div>
+
+    <div *ngIf="citasFuturas.length > 0">
+
+      <h3>Próximas citas</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Médico</th>
+            <th>Especialidad</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let c of citasFuturas">
+            <td>{{ c.codigoCita }}</td>
+            <td>{{ obtenerMedicoNombre(c.medicoId) }}</td>
+            <td>{{ obtenerEspecialidadNombre(c.especialidadId) }}</td>
+            <td>{{ c.fecha }}</td>
+            <td>{{ c.hora }}</td>
+            <td>{{ c.estado }}</td>
+
+            <td>
+              <button
+                class="btn-editar"
+                (click)="prepararReprogramacion(c)"
+              >
+                Reprogramar
+              </button>
+
+              <button
+                class="btn-eliminar"
+                (click)="cancelar(c.id)"
+              >
+                Cancelar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+
+    <div *ngIf="citasPasadas.length > 0">
+
+      <h3>Historial de citas</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Médico</th>
+            <th>Especialidad</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let c of citasPasadas">
+            <td>{{ c.codigoCita }}</td>
+            <td>{{ obtenerMedicoNombre(c.medicoId) }}</td>
+            <td>{{ obtenerEspecialidadNombre(c.especialidadId) }}</td>
+            <td>{{ c.fecha }}</td>
+            <td>{{ c.hora }}</td>
+            <td>{{ c.estado }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+
+  </div>
+
+  <!-- VISTA GENERAL PARA ADMIN, RECEPCIONISTA Y MÉDICO -->
+  <div
+    *ngIf="!esPaciente()"
+    class="card"
+  >
+    <h2>Listado de Citas</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Código</th>
+          <th>Paciente</th>
+          <th>Médico</th>
+          <th>Especialidad</th>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let c of citas">
+
+          <td>{{ c.id }}</td>
+          <td>{{ c.codigoCita }}</td>
+          <td>{{ obtenerPacienteNombre(c.pacienteId) }}</td>
+          <td>{{ obtenerMedicoNombre(c.medicoId) }}</td>
+          <td>{{ obtenerEspecialidadNombre(c.especialidadId) }}</td>
+          <td>{{ c.fecha }}</td>
+          <td>{{ c.hora }}</td>
+          <td>{{ c.estado }}</td>
+
+          <td>
+
+            <button
+              *ngIf="esAdmin() || esRecepcionista()"
+              class="btn-editar"
+              (click)="prepararReprogramacion(c)"
+            >
+              Reprogramar
+            </button>
+
+            <button
+              *ngIf="esAdmin() || esRecepcionista()"
+              class="btn-eliminar"
+              (click)="cancelar(c.id)"
+            >
+              Cancelar
+            </button>
+
+            <button
+              *ngIf="(esMedico() || esAdmin()) && c.estado === 'PROGRAMADA'"
+              class="btn-guardar mini"
+              (click)="prepararAtencion(c)"
+            >
+              Registrar atención
+            </button>
+
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

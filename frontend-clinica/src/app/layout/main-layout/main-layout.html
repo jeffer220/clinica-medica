@@ -1,0 +1,56 @@
+<div class="layout">
+
+  <aside class="sidebar">
+
+    <h2>Clínica Médica</h2>
+
+    <div class="usuario">
+      <strong>{{ email }}</strong>
+      <span>{{ rol }}</span>
+    </div>
+
+    <nav>
+
+      <!-- MENÚ ADMIN -->
+      <ng-container *ngIf="esAdmin()">
+        <a routerLink="/app/especialidades">Especialidades</a>
+        <a routerLink="/app/medicos">Médicos</a>
+        <a routerLink="/app/horarios">Horarios</a>
+        <a routerLink="/app/usuarios">Usuarios</a>
+        <a routerLink="/app/citas">Citas</a>
+        <a routerLink="/app/historial-medico">Historial Médico</a>
+      </ng-container>
+
+      <!-- MENÚ RECEPCIONISTA -->
+      <ng-container *ngIf="esRecepcionista()">
+        <a routerLink="/app/pacientes">Pacientes</a>
+        <a routerLink="/app/citas">Citas</a>
+        <a routerLink="/app/historial-medico">Historial Médico</a>
+      </ng-container>
+
+      <!-- MENÚ MÉDICO -->
+      <ng-container *ngIf="esMedico()">
+        <a routerLink="/app/citas">Citas asignadas</a>
+        <a routerLink="/app/horarios">Mis horarios</a>
+        <a routerLink="/app/historial-medico">Historial Médico</a>
+      </ng-container>
+
+      <!-- MENÚ PACIENTE -->
+      <ng-container *ngIf="esPaciente()">
+        <a routerLink="/app/citas">Solicitar / consultar citas</a>
+        <a routerLink="/app/historial-medico">Mi Historial Médico</a>
+      </ng-container>
+
+      <button type="button" (click)="logout()">
+        Cerrar sesión
+      </button>
+
+    </nav>
+
+  </aside>
+
+  <main class="contenido">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>

@@ -1,0 +1,45 @@
+<div class="auth-page">
+
+  <div class="auth-card">
+
+    <h1>Clínica Médica</h1>
+
+    <p class="subtitulo">
+      Inicia sesión para continuar
+    </p>
+
+    <div *ngIf="mensaje" class="mensaje exito">
+      {{ mensaje }}
+    </div>
+
+    <div *ngIf="error" class="mensaje error">
+      {{ error }}
+    </div>
+
+    <label>Email</label>
+
+    <input
+      [(ngModel)]="email"
+      type="email"
+      placeholder="Correo electrónico"
+    />
+
+    <label>Contraseña</label>
+
+    <input
+      [(ngModel)]="password"
+      type="password"
+      placeholder="Contraseña"
+    />
+
+    <button (click)="login()">
+      Ingresar
+    </button>
+
+    <a routerLink="/registro-usuario">
+      Registrarse
+    </a>
+
+  </div>
+
+</div>

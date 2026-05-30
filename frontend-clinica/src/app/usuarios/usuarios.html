@@ -1,0 +1,84 @@
+<div class="page">
+
+  <h1>Gestión de Usuarios</h1>
+
+  <div *ngIf="mensaje" class="mensaje exito">
+    {{ mensaje }}
+  </div>
+
+  <div *ngIf="error" class="mensaje error">
+    {{ error }}
+  </div>
+
+  <div class="card">
+
+    <h2>Registrar usuario interno</h2>
+
+    <label>Rol</label>
+    <select
+      [(ngModel)]="usuario.rol"
+      (change)="cambiarRol()"
+    >
+      <option *ngFor="let r of roles" [value]="r">
+        {{ r }}
+      </option>
+    </select>
+
+    <div *ngIf="usuario.rol === 'MEDICO'">
+
+      <label>Médico asociado</label>
+
+      <select
+        [(ngModel)]="usuario.medicoId"
+        (change)="seleccionarMedico()"
+      >
+        <option [ngValue]="null">
+          Seleccione un médico
+        </option>
+
+        <option
+          *ngFor="let medico of medicosDisponibles"
+          [ngValue]="medico.id"
+        >
+          {{ medico.nombre }} {{ medico.apellido }} - {{ medico.colegiado }}
+        </option>
+      </select>
+
+      <div
+        *ngIf="medicosDisponibles.length === 0"
+        class="mensaje info"
+      >
+        Todos los médicos activos ya tienen usuario asignado.
+      </div>
+
+    </div>
+
+    <label>Usuario</label>
+    <input
+      [(ngModel)]="usuario.username"
+      placeholder="Usuario"
+      [readonly]="usuario.rol === 'MEDICO'"
+    />
+
+    <label>Email</label>
+    <input
+      [(ngModel)]="usuario.email"
+      type="email"
+      placeholder="Correo electrónico"
+      [readonly]="usuario.rol === 'MEDICO'"
+    />
+
+    <label>Contraseña</label>
+    <input
+      [(ngModel)]="usuario.password"
+      type="password"
+      placeholder="Contraseña"
+    />
+
+    <button (click)="registrar()">
+      Guardar Usuario
+    </button>
+
+  </div>
+
+</div>

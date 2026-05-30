@@ -1,0 +1,34 @@
+<div class="contenedor">
+  <div class="encabezado">
+    <h1>Gestión de Especialidades</h1>
+</div>
+
+  <div *ngIf="mensaje" class="mensaje exito">{{ mensaje }}</div>
+  <div *ngIf="error" class="mensaje error">{{ error }}</div>
+
+  <div class="card">
+    <h2>Registrar Especialidad</h2>
+    <div class="formulario">
+      <div class="campo">
+        <label>Nombre</label>
+        <input [(ngModel)]="especialidad.nombre" placeholder="" />
+      </div>
+    </div>
+    <button class="btn-guardar" (click)="guardar()">Guardar Especialidad</button>
+  </div>
+
+  <div class="card">
+    <h2>Lista de Especialidades</h2>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Nombre</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of especialidades">
+          <td>{{ e.id }}</td>
+          <td>{{ e.nombre }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

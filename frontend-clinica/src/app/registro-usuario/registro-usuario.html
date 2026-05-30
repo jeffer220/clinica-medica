@@ -1,0 +1,95 @@
+<div class="auth-page">
+  <div class="auth-card">
+
+    <h1>Registrarse como Paciente</h1>
+
+    <div *ngIf="mensaje" class="mensaje exito">
+      {{ mensaje }}
+    </div>
+
+    <div *ngIf="error" class="mensaje error">
+      {{ error }}
+    </div>
+
+    <h3>Datos Generales</h3>
+
+    <label>Nombre</label>
+    <input
+      [(ngModel)]="paciente.nombre"
+      placeholder="Nombre"
+    />
+
+    <label>Apellido</label>
+    <input
+      [(ngModel)]="paciente.apellido"
+      placeholder="Apellido"
+    />
+
+    <label>Teléfono</label>
+    <input
+      [(ngModel)]="paciente.telefono"
+      placeholder="Teléfono"
+    />
+
+    <label>Email</label>
+    <input
+      [(ngModel)]="paciente.email"
+      type="email"
+      placeholder="Correo electrónico"
+    />
+
+    <small>
+      Este correo se usará para recibir notificaciones y para iniciar sesión.
+    </small>
+
+    <label>Fecha de nacimiento</label>
+    <input
+      [(ngModel)]="paciente.fechaNacimiento"
+      type="date"
+    />
+
+    <label>Dirección</label>
+    <input
+      [(ngModel)]="paciente.direccion"
+      placeholder="Dirección"
+    />
+
+    <label>Seguro médico</label>
+    <input
+      [(ngModel)]="paciente.seguroMedico"
+      placeholder="Seguro médico"
+    />
+
+    <h3>Datos de usuario</h3>
+
+    <label>Usuario</label>
+    <input
+      [(ngModel)]="usuario.username"
+      placeholder="Usuario"
+    />
+
+    <label>Email para inicio de sesión</label>
+    <input
+      type="email"
+      [value]="paciente.email"
+      readonly
+    />
+
+    <label>Contraseña</label>
+    <input
+      [(ngModel)]="usuario.password"
+      type="password"
+      placeholder="Contraseña"
+      autocomplete="new-password"
+    />
+
+    <button (click)="registrar()">
+      Confirmar Registro
+    </button>
+
+    <a routerLink="/login">
+      Volver al login
+    </a>
+
+  </div>
+</div>

@@ -1,0 +1,163 @@
+<div class="contenedor">
+
+  <div class="encabezado">
+    <h1>Historial Médico</h1>
+  </div>
+
+  <div *ngIf="mensaje" class="mensaje info">
+    {{ mensaje }}
+  </div>
+
+  <div *ngIf="error" class="mensaje error">
+    {{ error }}
+  </div>
+
+  <div class="card">
+
+    <h2>Consultar Historial Clínico</h2>
+
+    <div class="formulario">
+
+      <div
+        class="campo"
+        *ngIf="esAdmin() || esRecepcionista() || esMedico()"
+      >
+        <label>Paciente</label>
+
+        <select
+          [(ngModel)]="pacienteIdSeleccionado"
+          (change)="cambiarPaciente()"
+        >
+          <option [ngValue]="null">
+            Seleccione un paciente
+          </option>
+
+          <option
+            *ngFor="let p of pacientes"
+            [ngValue]="p.id"
+          >
+            {{ p.nombre }} {{ p.apellido }}
+          </option>
+        </select>
+      </div>
+
+      <div
+        class="campo"
+        *ngIf="esPaciente()"
+      >
+        <label>Paciente</label>
+
+        <input
+          value="Paciente actual"
+          readonly
+        />
+      </div>
+
+      <div class="campo">
+        <label>Registros por página</label>
+
+        <select
+          [(ngModel)]="limite"
+          (change)="cambiarLimite()"
+        >
+          <option [ngValue]="5">5</option>
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="20">20</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Orden</label>
+
+        <select
+          [(ngModel)]="sort"
+          (change)="cambiarOrden()"
+        >
+          <option value="desc">Más recientes primero</option>
+          <option value="asc">Más antiguos primero</option>
+        </select>
+      </div>
+
+    </div>
+
+    <button
+      class="btn-guardar"
+      (click)="consultarHistorial()"
+      [disabled]="cargando || !pacienteIdSeleccionado"
+    >
+      {{ cargando ? 'Cargando...' : 'Consultar historial' }}
+    </button>
+
+  </div>
+
+  <div
+    *ngIf="registros.length > 0"
+    class="card"
+  >
+
+    <h2>Registros clínicos</h2>
+
+    <div class="resumen-paginacion">
+      <p>
+        Total de registros: <strong>{{ totalRegistros }}</strong>
+      </p>
+
+      <p>
+        Página <strong>{{ paginaActual }}</strong>
+        de <strong>{{ totalPaginas }}</strong>
+      </p>
+    </div>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>ID Registro</th>
+          <th>Fecha Consulta</th>
+          <th>Médico</th>
+          <th>Especialidad</th>
+          <th>Diagnóstico</th>
+          <th>Receta</th>
+          <th>Observaciones</th>
+          <th>Resultado Lab.</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let r of registros">
+          <td>{{ r.idRegistro }}</td>
+          <td>{{ r.fechaConsulta }}</td>
+          <td>{{ r.medico?.nombre }}</td>
+          <td>{{ r.medico?.especialidad }}</td>
+          <td>{{ r.diagnosticoPrincipal }}</td>
+          <td>{{ r.recetaMedica || 'Sin receta' }}</td>
+          <td>{{ r.observaciones || 'Sin observaciones' }}</td>
+          <td>{{ r.resultadoLaboratorio || 'Sin resultados' }}</td>
+        </tr>
+      </tbody>
+
+    </table>
+
+    <div class="paginacion">
+
+      <button
+        class="btn-secundario"
+        (click)="paginaAnterior()"
+        [disabled]="paginaActual <= 1"
+      >
+        Anterior
+      </button>
+
+      <button
+        class="btn-secundario"
+        (click)="paginaSiguiente()"
+        [disabled]="paginaActual >= totalPaginas"
+      >
+        Siguiente
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

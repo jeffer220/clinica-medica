@@ -1,0 +1,185 @@
+<div class="contenedor">
+
+  <div class="encabezado">
+    <h1>
+      {{ esMedico() ? 'Mis Horarios' : 'Gestión de Horarios Médicos' }}
+    </h1>
+  </div>
+
+  <div *ngIf="mensaje" class="mensaje exito">
+    {{ mensaje }}
+  </div>
+
+  <div *ngIf="error" class="mensaje error">
+    {{ error }}
+  </div>
+
+  <div class="card">
+
+    <h2>
+      {{
+        editandoId
+          ? 'Editar Horario'
+          : (esMedico() ? 'Registrar mi horario' : 'Registrar Horario')
+      }}
+    </h2>
+
+    <div class="formulario">
+
+      <!-- ADMIN SÍ SELECCIONA MÉDICO -->
+      <div
+        class="campo"
+        *ngIf="esAdmin()"
+      >
+        <label>Médico</label>
+
+        <select [(ngModel)]="horario.medico.id">
+          <option [ngValue]="null">
+            Seleccione un médico
+          </option>
+
+          <option
+            *ngFor="let m of medicos"
+            [ngValue]="m.id"
+          >
+            {{ m.nombre }} {{ m.apellido }}
+          </option>
+        </select>
+      </div>
+
+      <!-- MÉDICO NO SELECCIONA MÉDICO -->
+      <div
+        class="campo"
+        *ngIf="esMedico()"
+      >
+        <label>Médico</label>
+
+        <input
+          value="Médico actual"
+          readonly
+        />
+      </div>
+
+      <div class="campo">
+        <label>Día</label>
+
+        <select [(ngModel)]="horario.diaSemana">
+          <option value="">
+            Seleccione un día
+          </option>
+
+          <option
+            *ngFor="let d of dias"
+            [value]="d"
+          >
+            {{ d }}
+          </option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Hora Inicio</label>
+
+        <input
+          type="time"
+          [(ngModel)]="horario.horaInicio"
+        />
+      </div>
+
+      <div class="campo">
+        <label>Hora Fin</label>
+
+        <input
+          type="time"
+          [(ngModel)]="horario.horaFin"
+        />
+      </div>
+
+    </div>
+
+    <button
+      class="btn-guardar"
+      (click)="guardar()"
+    >
+      {{ editandoId ? 'Actualizar Horario' : 'Guardar Horario' }}
+    </button>
+
+    <button
+      *ngIf="editandoId"
+      class="btn-secundario"
+      (click)="cancelarEdicion()"
+    >
+      Cancelar edición
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h2>
+      {{ esMedico() ? 'Mis horarios registrados' : 'Lista de Horarios' }}
+    </h2>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th *ngIf="esAdmin()">Médico</th>
+          <th>Día</th>
+          <th>Inicio</th>
+          <th>Fin</th>
+          <th>Disponible</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let h of horarios">
+
+          <td>{{ h.id }}</td>
+
+          <td *ngIf="esAdmin()">
+            {{ h.medico?.nombre }} {{ h.medico?.apellido }}
+          </td>
+
+          <td>{{ h.diaSemana }}</td>
+          <td>{{ h.horaInicio }}</td>
+          <td>{{ h.horaFin }}</td>
+          <td>{{ h.disponible ? 'Sí' : 'No' }}</td>
+
+          <td>
+
+            <button
+              class="btn-editar"
+              (click)="editarHorario(h)"
+            >
+              Editar
+            </button>
+
+            <button
+              *ngIf="h.disponible"
+              class="btn-eliminar"
+              (click)="desactivar(h.id)"
+            >
+              Desactivar
+            </button>
+
+            <button
+              *ngIf="!h.disponible"
+              class="btn-guardar mini"
+              (click)="activar(h.id)"
+            >
+              Activar
+            </button>
+
+          </td>
+
+        </tr>
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>

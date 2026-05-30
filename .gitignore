@@ -1,0 +1,23 @@
+# Java / Spring Boot
+target/
+*.log
+
+# Angular / Node
+node_modules/
+dist/
+.angular/
+.cache/
+
+# Variables de entorno
+.env
+*.env
+
+# IDE
+.idea/
+.vscode/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+*.lnk

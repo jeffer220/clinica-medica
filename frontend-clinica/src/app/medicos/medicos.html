@@ -1,0 +1,61 @@
+<div class="contenedor">
+  <div class="encabezado">
+    <h1>Gestión de Médicos</h1>
+</div>
+
+  <div *ngIf="mensaje" class="mensaje exito">{{ mensaje }}</div>
+  <div *ngIf="error" class="mensaje error">{{ error }}</div>
+
+  <div class="card">
+    <h2>{{ editandoId ? 'Actualizar Médico' : 'Registrar Médico' }}</h2>
+
+    <div class="formulario">
+      <div class="campo"><label>Colegiado</label><input [(ngModel)]="medico.colegiado" /></div>
+      <div class="campo"><label>Nombre</label><input [(ngModel)]="medico.nombre" /></div>
+      <div class="campo"><label>Apellido</label><input [(ngModel)]="medico.apellido" /></div>
+      <div class="campo"><label>Teléfono</label><input [(ngModel)]="medico.telefono" /></div>
+      <div class="campo"><label>Correo</label><input [(ngModel)]="medico.correo" /></div>
+      <div class="campo">
+        <label>Especialidad</label>
+        <select [(ngModel)]="medico.especialidad.id">
+          <option [ngValue]="null">Seleccione una especialidad</option>
+          <option *ngFor="let e of especialidades" [ngValue]="e.id">{{ e.nombre }}</option>
+        </select>
+      </div>
+      <div class="campo"><label>Dirección</label><input [(ngModel)]="medico.direccion" /></div>
+      <div class="campo"><label>Centro Hospitalario</label><input [(ngModel)]="medico.centroHospitalario" /></div>
+      <div class="campo"><label>Edad</label><input type="number" [(ngModel)]="medico.edad" /></div>
+      <div class="campo"><label>Observación</label><textarea [(ngModel)]="medico.observacion"></textarea></div>
+    </div>
+
+    <button class="btn-guardar" (click)="guardar()">{{ editandoId ? 'Actualizar Médico' : 'Guardar Médico' }}</button>
+    <button *ngIf="editandoId" class="btn-secundario" (click)="cancelarEdicion()">Cancelar</button>
+  </div>
+
+  <div class="card">
+    <h2>Lista de Médicos</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Colegiado</th><th>Nombre</th><th>Especialidad</th><th>Correo</th><th>Activo</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of medicos">
+          <td>{{ m.id }}</td>
+          <td>{{ m.colegiado }}</td>
+          <td>{{ m.nombre }} {{ m.apellido }}</td>
+          <td>{{ m.especialidad?.nombre }}</td>
+          <td>{{ m.correo }}</td>
+          <td>{{ m.activo ? 'Sí' : 'No' }}</td>
+          <td>
+            <button class="btn-editar" (click)="editar(m)">Editar</button>
+            <button *ngIf="m.activo" class="btn-eliminar" (click)="desactivar(m.id)">Desactivar</button>
+            <button *ngIf="!m.activo" class="btn-guardar mini" (click)="activar(m.id)">Activar</button>
+            <button class="btn-eliminar" (click)="eliminar(m.id)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

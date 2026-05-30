@@ -1,0 +1,232 @@
+<div class="contenedor">
+
+  <div class="encabezado">
+    <h1>Gestión de Pacientes</h1>
+  </div>
+
+  <div *ngIf="mensaje" class="mensaje exito">
+    {{ mensaje }}
+  </div>
+
+  <div *ngIf="error" class="mensaje error">
+    {{ error }}
+  </div>
+
+  <div class="card">
+
+    <h2>
+      {{ editandoId ? 'Actualizar Paciente' : 'Registrar Paciente' }}
+    </h2>
+
+    <div class="formulario">
+
+      <div class="campo">
+        <label>Nombre</label>
+        <input
+          type="text"
+          [(ngModel)]="paciente.nombre"
+          (blur)="generarUsuarioSugerido()"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="campo">
+        <label>Apellido</label>
+        <input
+          type="text"
+          [(ngModel)]="paciente.apellido"
+          (blur)="generarUsuarioSugerido()"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="campo">
+        <label>Teléfono</label>
+        <input
+          type="text"
+          [(ngModel)]="paciente.telefono"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="campo">
+        <label>Email</label>
+        <input
+          type="email"
+          [(ngModel)]="paciente.email"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="campo">
+        <label>Fecha Nacimiento</label>
+        <input
+          type="date"
+          [(ngModel)]="paciente.fechaNacimiento"
+        />
+      </div>
+
+      <div class="campo">
+        <label>Dirección</label>
+        <input
+          type="text"
+          [(ngModel)]="paciente.direccion"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="campo">
+        <label>Seguro Médico</label>
+        <input
+          type="text"
+          [(ngModel)]="paciente.seguroMedico"
+          autocomplete="off"
+        />
+      </div>
+
+    </div>
+
+    <!-- CREAR USUARIO OPCIONAL SOLO AL REGISTRAR PACIENTE NUEVO -->
+    <div
+      *ngIf="!editandoId"
+      class="usuario-opcional"
+    >
+
+      <label class="checkbox-line">
+        <input
+          type="checkbox"
+          [(ngModel)]="crearUsuarioPaciente"
+          (change)="cambiarCrearUsuario()"
+        />
+        Crear usuario para este paciente
+      </label>
+
+      <div
+        *ngIf="crearUsuarioPaciente"
+        class="formulario usuario-box"
+      >
+
+        <div class="campo">
+          <label>Usuario</label>
+          <input
+            type="text"
+            [(ngModel)]="usuarioPaciente.username"
+            placeholder="Usuario"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="campo">
+          <label>Email para inicio de sesión</label>
+          <input
+            type="email"
+            [value]="paciente.email"
+            readonly
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="campo">
+          <label>Contraseña</label>
+
+          <div class="password-box">
+            <input
+              [type]="mostrarPassword ? 'text' : 'password'"
+              [(ngModel)]="usuarioPaciente.password"
+              placeholder="Contraseña"
+              autocomplete="new-password"
+            />
+
+            <button
+              type="button"
+              class="btn-ver"
+              (click)="alternarMostrarPassword()"
+            >
+              {{ mostrarPassword ? 'Ocultar' : 'Ver' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="campo campo-completo">
+          <small>
+              
+          </small>
+        </div>
+
+      </div>
+
+    </div>
+
+    <button
+      class="btn-guardar"
+      (click)="guardarPaciente()"
+    >
+      {{ editandoId ? 'Actualizar Paciente' : 'Guardar Paciente' }}
+    </button>
+
+    <button
+      *ngIf="editandoId"
+      class="btn-secundario"
+      (click)="cancelarEdicion()"
+    >
+      Cancelar
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h2>Lista de Pacientes</h2>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Teléfono</th>
+          <th>Email</th>
+          <th>Fecha Nacimiento</th>
+          <th>Dirección</th>
+          <th>Seguro</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let p of pacientes">
+          <td>{{ p.id }}</td>
+          <td>{{ p.nombre }}</td>
+          <td>{{ p.apellido }}</td>
+          <td>{{ p.telefono }}</td>
+          <td>{{ p.email }}</td>
+          <td>{{ p.fechaNacimiento || p.fecha_nacimiento }}</td>
+          <td>{{ p.direccion }}</td>
+          <td>{{ p.seguroMedico || p.seguro_medico }}</td>
+
+          <td>
+            <button
+              class="btn-editar"
+              (click)="editarPaciente(p)"
+            >
+              Editar
+            </button>
+
+            <button
+              class="btn-eliminar"
+              (click)="eliminarPaciente(p.id)"
+            >
+              Eliminar
+            </button>
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
